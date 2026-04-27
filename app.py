@@ -1,17 +1,20 @@
 import os
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from openai import OpenAI
 
 app = FastAPI()
 
-# 大模型配置 —— 已经填入你的密钥！
+# 大模型配置 —— 从环境变量读取密钥（Railway专用）
 QWEN_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 QWEN_CHAT_MODEL = "qwen-plus"
-api_key = "sk-c5595e788c1446c586363d5960b35675"
-client = OpenAI(api_key=api_key, base_url=QWEN_BASE_URL)
+
+# 从环境变量读取 API Key，不写死在代码里
+client = OpenAI(
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url=QWEN_BASE_URL
+)
 
 # 请求体模型
 class ChatRequest(BaseModel):
@@ -30,7 +33,7 @@ async def chat(req: ChatRequest):
     )
     return {"reply": completion.choices[0].message.content}
 
-# 首页路由（直接读根目录的 index.html，不用 static 文件夹）
+# 首页路由
 @app.get("/")
 async def read_index():
     return FileResponse("index.html")
