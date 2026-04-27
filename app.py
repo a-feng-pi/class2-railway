@@ -1,32 +1,31 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+# 完整可运行代码
 from openai import OpenAI
-import os
+from fastapi import FastAPI
 
+# 初始化 FastAPI
 app = FastAPI()
 
-# 从环境变量读取密钥（Railway 专用）
+# 初始化 OpenAI 客户端（已填入你的 API Key）
 client = OpenAI(
-    api_key=os.getenv("DASHSCOPE_API_KEY"),
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key="sk-c5595e788c1446c586363d5960b35675"
 )
 
-# 首页：直接读取根目录的 index.html（适配你的结构）
-@app.get("/", response_class=HTMLResponse)
-async def home():
-    with open("index.html", "r", encoding="utf-8") as f:
-        return f.read()
+# 测试接口
+@app.get("/")
+def home():
+    return {"message": "服务启动成功！OpenAI 已正常连接"}
 
-# 聊天接口
-@app.post("/chat")
-async def chat(request: Request):
-    data = await request.json()
-    user_msg = data.get("message", "")
-
-    completion = client.chat.completions.create(
-        model="qwen-plus",  # 用你原来的模型，更稳定
-        messages=[{"role": "user", "content": user_msg}]
+# 调用 OpenAI 接口示例
+@app.get("/chat")
+def chat(prompt: str = "你好"):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}]
     )
+    return {
+        "prompt": prompt,
+        "reply": response.choices[0].message.content
+    }
     return {"reply": completion.choices[0].message.content}
 
 # Railway 必须的启动配置
