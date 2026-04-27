@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 聊天机器人</title>
+    <style>
+        body{max-width:600px;margin:20px auto;padding:10px;}
+        #history{border:1px solid #ddd;padding:15px;border-radius:8px;height:400px;overflow-y:auto;margin-bottom:10px;}
+        .msg{margin:8px 0;padding:8px 12px;border-radius:6px;}
+        .user{background:#e3f2fd;text-align:right;}
+        .bot{background:#f5f5f5;text-align:left;}
+        #inputArea{display:flex;gap:5px;}
+        input{flex:1;padding:10px;border:1px solid #ddd;border-radius:6px;}
+        button{padding:10px 16px;background:#0d6efd;color:white;border:none;border-radius:6px;cursor:pointer;}
+    </style>
+</head>
+<body>
+    <h2>AI 聊天机器人</h2>
+    <div id="history"></div>
+    <div id="inputArea">
+        <input id="msgInput" placeholder="输入你的问题..." autocomplete="off">
+        <button onclick="sendMsg()">发送</button>
+    </div>
+
+    <script>
+        async function sendMsg() {
+            let input = document.getElementById("msgInput");
+            let msg = input.value.trim();
+            if (!msg) return;
+
+            let history = document.getElementById("history");
+            history.innerHTML += `<div class="msg user">我：${msg}</div>`;
+            input.value = "";
+
+            let res = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: msg })
+            });
+
+            let data = await res.json();
+            history.innerHTML += `<div class="msg bot">AI：${data.reply}</div>`;
+            history.scrollTop = history.scrollHeight;
+        }
+
+        document.getElementById("msgInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") sendMsg();
+        });
+    </script>
+</body>
+</html>
