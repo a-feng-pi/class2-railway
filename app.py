@@ -26,10 +26,3 @@ def chat(prompt: str = "你好"):
         "prompt": prompt,
         "reply": response.choices[0].message.content
     }
-    return {"reply": completion.choices[0].message.content}
-
-# Railway 必须的启动配置
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
